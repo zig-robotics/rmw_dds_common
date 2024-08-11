@@ -1,0 +1,30 @@
+.{
+    .name = "rmw_dds_common",
+    .version = "3.1.0",
+    .dependencies = .{
+        .rmw_dds_common = .{
+            .url = "https://github.com/ros2/rmw_dds_common/archive/tags/3.1.0.tar.gz", // Jazzy
+            .hash = "1220df5313ceeaa68e2dd9e53c322771fbc0dd306231beac7f95baca43daff1a82a1",
+        },
+        .rcutils = .{
+            .url = "https://github.com/zig-robotics/rcutils/archive/647dad504b790580206f90f57a07e62c2701319a.tar.gz", // Jazzy
+            .hash = "122037f70bcd7974dd0cdcb5a7b58e49053214635d77aa8a7e4aa0c5a533e12b12cf",
+        },
+        .rcpputils = .{
+            .url = "https://github.com/zig-robotics/rcpputils/archive/5ad35231473dbde76bf7466bd30d55e868b6f4bb.tar.gz", // Jazzy
+            .hash = "12204bdab8ee18ee5d14ebce9ae35a3fab95427ca8b7a46e32fdf121a615bdae4775",
+        },
+        .rmw = .{
+            .url = "https://github.com/zig-robotics/rmw/archive/793e24a20bde00943ecb3abd4b722b19d80c2dc5.tar.gz",
+            .hash = "1220ae7ebf01f9b589bc7d9d579226a9718a0d822ea63bd5c6e226749ba2cc6e2f95",
+        },
+        .rosidl = .{
+            .url = "https://github.com/zig-robotics/rosidl/archive/3a7f87cb8404d6b1511859200d6237356c54b9f3.tar.gz",
+            .hash = "122097ec655532d1a65e40039542786cf5cb3cd7f8682ad88f756d61e8a42b7d2b0d",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+    },
+}
