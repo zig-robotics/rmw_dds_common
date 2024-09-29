@@ -20,7 +20,6 @@ pub fn build(b: *std.Build) void {
     });
 
     rmw_dds_common.linkLibCpp();
-    rmw_dds_common.addIncludePath(upstream.path("include"));
 
     const rcutils_dep = b.dependency("rcutils", .{
         .target = target,
@@ -87,39 +86,37 @@ pub fn build(b: *std.Build) void {
     b.installArtifact(interface_generator.typesupport_introspection_c.artifact);
     b.installArtifact(interface_generator.typesupport_introspection_cpp.artifact);
 
-    // TODO c generator is fully working, still need the other generators (specifically the C++ generators for rmw_dds_common)
-
     // rmw_dds_common depends on this outside of just interfaces, so name it explicitly
     rmw_dds_common.linkLibrary(rosidl_dep.artifact("rosidl_runtime_c"));
     // TODO default generator is just cmake foo, and only required for generating the interfaces, need to figure out a plan here
     // rmw_dds_common.linkLibrary(rosidl_dep.artifact("rosidl_default_generators"));
-    // rmw_dds_common.addIncludePath(rosidl_dep.namedWriteFiles("rosidl_typesupport_interface").getDirectory()); // grab the underlying rosidl dependency for now, until header only libraries are figured out
 
     // for now name the interface related dependencies explicitly
     // TODO consider a helper that handles this?
 
     rmw_dds_common.addIncludePath(interface_generator.generator_cpp.artifact.getDirectory());
+    rmw_dds_common.linkLibrary(interface_generator.typesupport_cpp.artifact);
     rmw_dds_common.addIncludePath(rosidl_dep.namedWriteFiles("rosidl_runtime_cpp").getDirectory());
     rmw_dds_common.addIncludePath(rosidl_dep.namedWriteFiles("rosidl_typesupport_interface").getDirectory());
     rmw_dds_common.addIncludePath(upstream.path("rmw_dds_common/include"));
 
-    // // TODO need interface generation as well, links against the generated rosidl_typesupport_cpp files
     rmw_dds_common.addCSourceFiles(.{
         .root = upstream.path("rmw_dds_common"),
         .files = &.{
+            "src/context.cpp",
             "src/gid_utils.cpp",
             "src/graph_cache.cpp",
             "src/qos.cpp",
             "src/security.cpp",
             "src/time_utils.cpp",
         },
-        .flags = &.{"-Wno-deprecated-declarations"},
+        .flags = &.{ "-Wno-deprecated-declarations", "--std=c++17" },
     });
 
     rmw_dds_common.installHeadersDirectory(
         upstream.path("rmw_dds_common/include"),
         "",
-        .{},
+        .{ .include_extensions = &.{ ".hpp", ".h" } },
     );
     b.installArtifact(rmw_dds_common);
 }
