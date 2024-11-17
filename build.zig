@@ -13,6 +13,7 @@ pub fn build(b: *std.Build) void {
         .root_module = .{
             .target = target,
             .optimize = optimize,
+            .pic = if (linkage == .dynamic) true else null,
         },
         .name = "rmw_dds_common",
         .kind = .lib,
@@ -53,16 +54,15 @@ pub fn build(b: *std.Build) void {
         b,
         "rmw_dds_common",
         rosidl_dep,
-        rcutils_dep.artifact("rcutils"),
         target,
         optimize,
         linkage,
     );
 
-    interface_generator.addMsgs(&.{
-        .{ .path = upstream.path("rmw_dds_common"), .file = "msg/Gid.msg" },
-        .{ .path = upstream.path("rmw_dds_common"), .file = "msg/NodeEntitiesInfo.msg" },
-        .{ .path = upstream.path("rmw_dds_common"), .file = "msg/ParticipantEntitiesInfo.msg" },
+    interface_generator.addInterfaces(upstream.path("rmw_dds_common"), &.{
+        "msg/Gid.msg",
+        "msg/NodeEntitiesInfo.msg",
+        "msg/ParticipantEntitiesInfo.msg",
     });
 
     var test_install = b.addInstallDirectory(.{
@@ -96,8 +96,12 @@ pub fn build(b: *std.Build) void {
 
     rmw_dds_common.addIncludePath(interface_generator.generator_cpp.artifact.getDirectory());
     rmw_dds_common.linkLibrary(interface_generator.typesupport_cpp.artifact);
-    rmw_dds_common.addIncludePath(rosidl_dep.namedWriteFiles("rosidl_runtime_cpp").getDirectory());
-    rmw_dds_common.addIncludePath(rosidl_dep.namedWriteFiles("rosidl_typesupport_interface").getDirectory());
+    rmw_dds_common.addIncludePath(rosidl_dep.namedWriteFiles(
+        "rosidl_runtime_cpp",
+    ).getDirectory());
+    rmw_dds_common.addIncludePath(rosidl_dep.namedWriteFiles(
+        "rosidl_typesupport_interface",
+    ).getDirectory());
     rmw_dds_common.addIncludePath(upstream.path("rmw_dds_common/include"));
 
     rmw_dds_common.addCSourceFiles(.{
@@ -110,7 +114,12 @@ pub fn build(b: *std.Build) void {
             "src/security.cpp",
             "src/time_utils.cpp",
         },
-        .flags = &.{ "-Wno-deprecated-declarations", "--std=c++17" },
+        .flags = &.{
+            "-Wno-deprecated-declarations",
+            "--std=c++17",
+            "-fvisibility=hidden",
+            "-fvisibility-inlines-hidden",
+        },
     });
 
     rmw_dds_common.installHeadersDirectory(
